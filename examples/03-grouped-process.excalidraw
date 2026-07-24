@@ -1,0 +1,382 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://github.com/example/excali2md",
+  "elements": [
+    {
+      "id": "group-frame",
+      "type": "frame",
+      "x": 40,
+      "y": 50,
+      "width": 900,
+      "height": 300,
+      "angle": 0,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": null,
+      "name": "Authentication pipeline"
+    },
+    {
+      "id": "group-receive",
+      "type": "rectangle",
+      "x": 100,
+      "y": 150,
+      "width": 180,
+      "height": 90,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [
+        "group-auth"
+      ],
+      "frameId": "group-frame",
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [
+        {
+          "id": "group-receive-text",
+          "type": "text"
+        },
+        {
+          "id": "group-a1",
+          "type": "arrow"
+        }
+      ]
+    },
+    {
+      "id": "group-receive-text",
+      "type": "text",
+      "x": 120,
+      "y": 180,
+      "width": 140,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [
+        "group-auth"
+      ],
+      "frameId": "group-frame",
+      "roundness": null,
+      "boundElements": null,
+      "fontSize": 20,
+      "fontFamily": 1,
+      "text": "Receive credentials",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "group-receive",
+      "originalText": "Receive credentials",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "group-check",
+      "type": "rectangle",
+      "x": 390,
+      "y": 150,
+      "width": 180,
+      "height": 90,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [
+        "group-auth"
+      ],
+      "frameId": "group-frame",
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [
+        {
+          "id": "group-check-text",
+          "type": "text"
+        },
+        {
+          "id": "group-a1",
+          "type": "arrow"
+        },
+        {
+          "id": "group-a2",
+          "type": "arrow"
+        }
+      ]
+    },
+    {
+      "id": "group-check-text",
+      "type": "text",
+      "x": 420,
+      "y": 180,
+      "width": 120,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [
+        "group-auth"
+      ],
+      "frameId": "group-frame",
+      "roundness": null,
+      "boundElements": null,
+      "fontSize": 20,
+      "fontFamily": 1,
+      "text": "Check identity",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "group-check",
+      "originalText": "Check identity",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "group-session",
+      "type": "rectangle",
+      "x": 680,
+      "y": 150,
+      "width": 180,
+      "height": 90,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [],
+      "frameId": "group-frame",
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [
+        {
+          "id": "group-session-text",
+          "type": "text"
+        },
+        {
+          "id": "group-a2",
+          "type": "arrow"
+        }
+      ]
+    },
+    {
+      "id": "group-session-text",
+      "type": "text",
+      "x": 710,
+      "y": 180,
+      "width": 120,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [],
+      "frameId": "group-frame",
+      "roundness": null,
+      "boundElements": null,
+      "fontSize": 20,
+      "fontFamily": 1,
+      "text": "Create session",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "group-session",
+      "originalText": "Create session",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "group-a1",
+      "type": "arrow",
+      "x": 288,
+      "y": 195,
+      "width": 94,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [
+        "group-auth"
+      ],
+      "frameId": "group-frame",
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          94,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "group-receive",
+        "focus": 0,
+        "gap": 8
+      },
+      "endBinding": {
+        "elementId": "group-check",
+        "focus": 0,
+        "gap": 8
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
+    },
+    {
+      "id": "group-a2",
+      "type": "arrow",
+      "x": 578,
+      "y": 195,
+      "width": 94,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "groupIds": [],
+      "frameId": "group-frame",
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          94,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "group-check",
+        "focus": 0,
+        "gap": 8
+      },
+      "endBinding": {
+        "elementId": "group-session",
+        "focus": 0,
+        "gap": 8
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
