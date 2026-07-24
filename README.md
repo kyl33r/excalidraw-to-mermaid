@@ -16,18 +16,20 @@ A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explic
 
 ## Quickstart
 
+This project uses [Bun](https://bun.sh/) as the primary package manager and command runner. Bun 1.3 or newer is recommended.
+
 Install dependencies and build the CLI:
 
 ```sh
-npm install
-npm run build
+bun install
+bun run build
 mkdir -p artifacts
 ```
 
 Convert an Excalidraw document to Mermaid:
 
 ```sh
-npm run convert -- \
+bun run convert -- \
   examples/01-basic-flow.excalidraw \
   artifacts/01-basic-flow.mmd
 ```
@@ -41,9 +43,9 @@ excali2md <input.excalidraw> <output.mmd>
 The other bundled examples can be converted in the same way:
 
 ```sh
-npm run convert -- examples/02-branching-flow.excalidraw artifacts/02-branching-flow.mmd
-npm run convert -- examples/03-grouped-process.excalidraw artifacts/03-grouped-process.mmd
-npm run convert -- examples/04-quant-agent.excalidraw artifacts/04-quant-agent.mmd
+bun run convert -- examples/02-branching-flow.excalidraw artifacts/02-branching-flow.mmd
+bun run convert -- examples/03-grouped-process.excalidraw artifacts/03-grouped-process.mmd
+bun run convert -- examples/04-quant-agent.excalidraw artifacts/04-quant-agent.mmd
 ```
 
 Convert every example:
@@ -51,7 +53,7 @@ Convert every example:
 ```sh
 for input in examples/*.excalidraw; do
   name="$(basename "$input" .excalidraw)"
-  npm run --silent convert -- "$input" "artifacts/$name.mmd"
+  bun run convert -- "$input" "artifacts/$name.mmd"
 done
 ```
 
@@ -72,10 +74,10 @@ Inspect generated Mermaid source:
 less artifacts/01-basic-flow.mmd
 ```
 
-Validate its syntax and render an SVG using the locally installed Mermaid CLI:
+Validate its syntax and render an SVG using Mermaid CLI through Bun:
 
 ```sh
-npx --no-install mmdc \
+bunx mmdc \
   -i artifacts/01-basic-flow.mmd \
   -o artifacts/01-basic-flow.svg \
   -b transparent
@@ -90,7 +92,7 @@ open artifacts/01-basic-flow.svg
 Render a PNG instead:
 
 ```sh
-npx --no-install mmdc \
+bunx mmdc \
   -i artifacts/01-basic-flow.mmd \
   -o artifacts/01-basic-flow.png \
   -b white
@@ -103,7 +105,7 @@ Validate and render every generated Mermaid file:
 ```sh
 for input in artifacts/*.mmd; do
   output="${input%.mmd}.svg"
-  npx --no-install mmdc -i "$input" -o "$output" -b transparent
+  bunx mmdc -i "$input" -o "$output" -b transparent
 done
 ```
 
@@ -112,24 +114,24 @@ done
 Run the complete test suite, typecheck, and build:
 
 ```sh
-npm test
-npm run typecheck
-npm run build
+bun run test
+bun run typecheck
+bun run build
 ```
 
 Run only the example integration tests:
 
 ```sh
-npm test -- --run test/examples.test.ts
+bunx vitest run test/examples.test.ts
 ```
 
 Run the converter and CLI tests:
 
 ```sh
-npm test -- --run test/convert.test.ts test/cli.test.ts
+bunx vitest run test/convert.test.ts test/cli.test.ts
 ```
 
-Dependencies and npm's cache are kept inside this repository (`node_modules/` and `.npm-cache/`) and ignored by Git. Generated files under `artifacts/` are also ignored.
+Bun installs dependencies into the ignored `node_modules/` directory. Generated files under `artifacts/` are also ignored by Git.
 
 ## Design document status
 
