@@ -197,6 +197,7 @@ export function normalizeExcalidrawElements(
     const points = normalizePoints(element.points, { x, y }, center, rotation);
     const groups = groupIds(element.groupIds);
     const text = optionalString(element.text);
+    const name = nonBlankString(element.name);
     const containerId = nonBlankString(element.containerId);
     const frameId = nonBlankString(element.frameId);
     const startBindingId = bindingElementId(element.startBinding);
@@ -271,6 +272,7 @@ export function normalizeExcalidrawElements(
       center,
       rotation,
       ...(text === undefined ? {} : { text }),
+      ...(name === undefined ? {} : { name }),
       ...(containerId === undefined ? {} : { containerId }),
       ...(frameId === undefined ? {} : { frameId }),
       ...(groups === undefined ? {} : { groupIds: groups }),

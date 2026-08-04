@@ -96,7 +96,7 @@ export function buildDiagramGraph(
     const id = frameIdMap.get(frame.id) ?? groupId(frame.id);
     return {
       id,
-      label: frame.text ?? frame.id,
+      label: frame.name ?? frame.text ?? frame.id,
       childNodeIds: nodes
         .filter(({ parentGroupId }) => parentGroupId === id)
         .map(({ id: nodeId }) => nodeId),

@@ -61,12 +61,12 @@ describe("workspace conversion", () => {
     ).toBe(true);
   });
 
-  it("converts the constrained palette and reports imported unsupported types", () => {
+  it("converts supported frames and reports imported unsupported types", () => {
     const result = convertWorkspaceScene(
       JSON.stringify({
         type: "excalidraw",
         elements: [
-          element("node", "rectangle"),
+          element("node", "rectangle", { frameId: "frame-a" }),
           element("label", "text", {
             text: "Start",
             containerId: "node",
@@ -75,23 +75,21 @@ describe("workspace conversion", () => {
             width: 60,
             height: 20,
           }),
-          element("frame-a", "frame"),
-          element("frame-b", "frame", { x: 200 }),
+          element("frame-a", "frame", { name: "Authentication pipeline" }),
           element("stroke", "freedraw"),
         ],
       }),
     );
 
     expect(result.mermaid).toContain('n_node["Start"]');
-    expect(result.graph.groups).toEqual([]);
+    expect(result.graph.groups).toEqual([
+      expect.objectContaining({
+        id: "g_frame_a",
+        label: "Authentication pipeline",
+        childNodeIds: ["n_node"],
+      }),
+    ]);
     expect(result.unsupportedWarnings).toEqual([
-      {
-        code: "unsupported-source-element",
-        elementIds: ["frame-a", "frame-b"],
-        message:
-          'Elements of type "frame" remain visible in the source but are excluded from conversion.',
-        severity: "warning",
-      },
       {
         code: "unsupported-source-element",
         elementIds: ["stroke"],

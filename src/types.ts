@@ -62,6 +62,7 @@ export interface NormalizedElement {
   center: Point;
   rotation: number;
   text?: string;
+  name?: string;
   containerId?: string;
   frameId?: string;
   groupIds?: string[];

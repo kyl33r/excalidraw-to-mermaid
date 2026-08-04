@@ -10,6 +10,7 @@ export const AUTHORING_ELEMENT_TYPES = new Set([
   "diamond",
   "arrow",
   "text",
+  "frame",
 ]);
 
 const NODE_ELEMENT_TYPES = new Set(["rectangle", "ellipse", "diamond"]);

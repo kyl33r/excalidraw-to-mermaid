@@ -168,6 +168,12 @@ button {
   inset: 0;
 }
 
+.canvas-wrap .SVGLayer,
+.canvas-wrap .SVGLayer > svg {
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Keep the authored palette aligned with the converter's initial scope. */
 .canvas-wrap [data-testid="toolbar-line"],
 .canvas-wrap [data-testid="toolbar-freedraw"],
