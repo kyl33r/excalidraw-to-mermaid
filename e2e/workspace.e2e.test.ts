@@ -107,6 +107,50 @@ afterAll(async () => {
 });
 
 describe("Conversion Workspace", () => {
+  it("fits within a 480px viewport without horizontal scrolling", async () => {
+    await page.setViewport({ width: 480, height: 900, deviceScaleFactor: 1 });
+    await openEmptyWorkspace();
+
+    const layout = await page.evaluate(() => {
+      const workspace = document.querySelector<HTMLElement>(".workspace");
+      const workspaceBounds = workspace?.getBoundingClientRect();
+      const overflowingRegions = [
+        ".app-header",
+        ".workspace",
+        ".source-pane",
+        ".source-header",
+        ".source-actions",
+        ".canvas-wrap",
+        ".source-footer",
+        ".convert-rail",
+        ".result-pane",
+        ".result-header",
+      ].flatMap((selector) => {
+        const element = document.querySelector<HTMLElement>(selector);
+        return element && element.scrollWidth > element.clientWidth + 1
+          ? [{ selector, width: element.clientWidth, contentWidth: element.scrollWidth }]
+          : [];
+      });
+      return {
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        workspaceLeft: workspaceBounds?.left ?? -1,
+        workspaceRight: workspaceBounds?.right ?? -1,
+        workspaceWidth: workspace?.clientWidth ?? -1,
+        workspaceContentWidth: workspace?.scrollWidth ?? -1,
+        overflowingRegions,
+      };
+    });
+
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth);
+    expect(layout.workspaceLeft).toBeGreaterThanOrEqual(0);
+    expect(layout.workspaceRight).toBeLessThanOrEqual(layout.viewportWidth);
+    expect(layout.workspaceContentWidth).toBeLessThanOrEqual(
+      layout.workspaceWidth,
+    );
+    expect(layout.overflowingRegions).toEqual([]);
+  });
+
   it("lets a user draw three connected rectangles and render them as Mermaid", async () => {
     const pageErrors = capturePageErrors();
     await openEmptyWorkspace();
@@ -223,6 +267,132 @@ describe("Conversion Workspace", () => {
     );
     expect(previewLabels.replaceAll(/\s/g, "")).toContain("Receiverequest");
     expect(previewLabels.replaceAll(/\s/g, "")).toContain("Inputvalid?");
+    expect(pageErrors).toEqual([]);
+  });
+
+  it("preserves a framed process as a Mermaid subgraph", async () => {
+    const pageErrors = capturePageErrors();
+    await openEmptyWorkspace();
+
+    const fileChooserPromise = page.waitForFileChooser();
+    await page.locator('::-p-xpath(//button[normalize-space()="Open"])').click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.accept([
+      fileURLToPath(
+        new URL("../examples/03-grouped-process.excalidraw", import.meta.url),
+      ),
+    ]);
+
+    await page.waitForFunction(() => {
+      const convert = document.querySelector<HTMLButtonElement>(
+        "button.convert-button",
+      );
+      return convert !== null && !convert.disabled;
+    });
+    await page.click("button.convert-button");
+    await page.waitForSelector(".mermaid-preview svg", { visible: true });
+
+    const resultSummary = await page.$eval(
+      ".result-meta",
+      (element) => element.textContent ?? "",
+    );
+    expect(resultSummary).toContain("3 nodes");
+    expect(resultSummary).toContain("2 edges");
+    expect(resultSummary).toContain("1 groups");
+    expect(resultSummary).toContain("0 warnings");
+
+    await page.click("details.source-code summary");
+    const mermaidSource = await page.$eval(
+      ".source-code code",
+      (element) => element.textContent ?? "",
+    );
+    expect(mermaidSource).toContain(
+      'subgraph g_group_frame["Authentication pipeline"]',
+    );
+    expect(pageErrors).toEqual([]);
+  });
+
+  it("renders a branching decision that rejoins into one flow", async () => {
+    const pageErrors = capturePageErrors();
+    await openEmptyWorkspace();
+
+    const fileChooserPromise = page.waitForFileChooser();
+    await page.locator('::-p-xpath(//button[normalize-space()="Open"])').click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.accept([
+      fileURLToPath(
+        new URL("../examples/02-branching-flow.excalidraw", import.meta.url),
+      ),
+    ]);
+
+    await page.waitForFunction(() => {
+      const convert = document.querySelector<HTMLButtonElement>(
+        "button.convert-button",
+      );
+      return convert !== null && !convert.disabled;
+    });
+    await page.click("button.convert-button");
+    await page.waitForSelector(".mermaid-preview svg", { visible: true });
+
+    const resultSummary = await page.$eval(
+      ".result-meta",
+      (element) => element.textContent ?? "",
+    );
+    expect(resultSummary).toContain("5 nodes");
+    expect(resultSummary).toContain("5 edges");
+    expect(resultSummary).toContain("0 warnings");
+
+    await page.click("details.source-code summary");
+    const mermaidSource = await page.$eval(
+      ".source-code code",
+      (element) => element.textContent ?? "",
+    );
+    expect(mermaidSource).toContain('n_branch_stock{"In stock?"}');
+    expect(mermaidSource.match(/-->/g)).toHaveLength(5);
+    expect(mermaidSource).toContain("Ship order");
+    expect(mermaidSource).toContain("Create backorder");
+    expect(mermaidSource).toContain("Notify customer");
+    expect(pageErrors).toEqual([]);
+  });
+
+  it("renders a 23-node architecture without browser errors", async () => {
+    const pageErrors = capturePageErrors();
+    await openEmptyWorkspace();
+
+    const fileChooserPromise = page.waitForFileChooser();
+    await page.locator('::-p-xpath(//button[normalize-space()="Open"])').click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.accept([
+      fileURLToPath(
+        new URL("../examples/04-quant-agent.excalidraw", import.meta.url),
+      ),
+    ]);
+
+    await page.waitForFunction(() => {
+      const convert = document.querySelector<HTMLButtonElement>(
+        "button.convert-button",
+      );
+      return convert !== null && !convert.disabled;
+    });
+    await page.click("button.convert-button");
+    await page.waitForSelector(".mermaid-preview svg", { visible: true });
+
+    const resultSummary = await page.$eval(
+      ".result-meta",
+      (element) => element.textContent ?? "",
+    );
+    expect(resultSummary).toContain("23 nodes");
+    expect(resultSummary).toContain("24 edges");
+    expect(resultSummary).toContain("0 warnings");
+
+    await page.click("details.source-code summary");
+    const mermaidSource = await page.$eval(
+      ".source-code code",
+      (element) => element.textContent ?? "",
+    );
+    expect(mermaidSource.match(/-->/g)).toHaveLength(24);
+    expect(mermaidSource).toContain("LLM Agents");
+    expect(mermaidSource).toContain("Final Answer / Trading<br/>Signal");
     expect(pageErrors).toEqual([]);
   });
 });
