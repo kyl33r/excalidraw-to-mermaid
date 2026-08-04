@@ -1,6 +1,10 @@
 # excali2md
 
-A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explicit phases.
+Draw an Excalidraw flowchart and turn it into deterministic Mermaid source,
+directly in the browser or from the command line.
+
+The interactive workspace embeds Excalidraw, renders a Mermaid SVG preview,
+and keeps the diagram local to your browser.
 
 ## Current capabilities
 
@@ -11,6 +15,8 @@ A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explic
 - Explicit and conservative geometric arrow endpoint resolution.
 - Frame-to-subgraph conversion and graph-direction inference.
 - Escaped, deterministic Mermaid flowchart generation.
+- Embedded browser editor with Mermaid source and SVG previews.
+- Open/save `.excalidraw` files and download `.mmd` or SVG output.
 - Minimal file-in/file-out CLI.
 - Machine-readable warnings for malformed, ambiguous, or omitted content.
 
@@ -31,6 +37,17 @@ Open `http://127.0.0.1:4173`. The workspace embeds a constrained Excalidraw
 editor, converts the current scene on demand, and renders a Mermaid preview
 without uploading the source diagram. Source diagrams are autosaved in the
 browser and can also be opened or saved as `.excalidraw` files.
+
+To convert a simple flowchart:
+
+1. Draw rectangles, ellipses, or diamonds and add text labels.
+2. Connect the shapes with arrows.
+3. Choose **Convert** to generate Mermaid source and its SVG preview.
+4. Copy the Mermaid source or download the `.mmd`, SVG, or source diagram.
+
+The first supported workflow is intentionally narrow: flowchart shapes, text,
+arrows, and frames are converted. Unsupported elements in opened files are
+omitted from conversion with a warning.
 
 ### Command line
 
@@ -127,10 +144,10 @@ done
 
 ## Testing
 
-Run the complete test suite, typecheck, and build:
+Run the unit and real-browser test suites, then typecheck and build:
 
 ```sh
-bun run test
+bun run test:all
 bun run typecheck
 bun run build
 ```
