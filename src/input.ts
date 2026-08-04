@@ -36,7 +36,7 @@ export function parseExcalidrawJson(
   if (
     !Number.isFinite(maxInputBytes) ||
     maxInputBytes < 0 ||
-    Buffer.byteLength(input, "utf8") > maxInputBytes
+    new TextEncoder().encode(input).byteLength > maxInputBytes
   ) {
     throw new ConversionInputError(
       "input-too-large",

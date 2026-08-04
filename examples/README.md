@@ -14,7 +14,7 @@ Open any file in Excalidraw using **Open** or by dragging the file onto the canv
 From the repository root:
 
 ```bash
-npm run build
+bun run build
 INPUT=./examples/01-basic-flow.excalidraw node --input-type=module <<'NODE'
 import fs from "node:fs";
 import {

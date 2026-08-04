@@ -12,16 +12,39 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "bun run build:lib && bun run build:web",
+    "build:lib": "tsc -p tsconfig.build.json",
+    "build:web": "vite build",
     "convert": "node dist/cli.js",
+    "dev": "vite",
+    "preview": "vite preview",
     "test": "vitest run",
+    "test:all": "bun run test && bun run test:e2e",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e:headed": "E2E_HEADLESS=false E2E_SLOW_MO=120 vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "bun run typecheck:lib && bun run typecheck:web",
+    "typecheck:lib": "tsc --noEmit",
+    "typecheck:web": "tsc -p tsconfig.web.json --noEmit"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.16.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "25.9.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "jsdom": "^30.0.1",
+    "puppeteer": "^25.4.0",
     "typescript": "7.0.2",
+    "vite": "^8.2.0",
     "vitest": "4.1.10"
+  },
+  "dependencies": {
+    "@excalidraw/excalidraw": "^0.18.1",
+    "mermaid": "^11.16.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }

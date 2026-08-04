@@ -1,6 +1,10 @@
 # excali2md
 
-A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explicit phases.
+Draw an Excalidraw flowchart and turn it into deterministic Mermaid source,
+directly in the browser or from the command line.
+
+The interactive workspace embeds Excalidraw, renders a Mermaid SVG preview,
+and keeps the diagram local to your browser.
 
 ## Current capabilities
 
@@ -11,12 +15,41 @@ A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explic
 - Explicit and conservative geometric arrow endpoint resolution.
 - Frame-to-subgraph conversion and graph-direction inference.
 - Escaped, deterministic Mermaid flowchart generation.
+- Embedded browser editor with Mermaid source and SVG previews.
+- Open/save `.excalidraw` files and download `.mmd` or SVG output.
 - Minimal file-in/file-out CLI.
 - Machine-readable warnings for malformed, ambiguous, or omitted content.
 
 ## Quickstart
 
 This project uses [Bun](https://bun.sh/) as the primary package manager and command runner. Bun 1.3 or newer is recommended.
+
+### Interactive workspace
+
+Run the browser-local Excalidraw-to-Mermaid workspace:
+
+```sh
+bun install
+bun run dev
+```
+
+Open `http://127.0.0.1:4173`. The workspace embeds a constrained Excalidraw
+editor, converts the current scene on demand, and renders a Mermaid preview
+without uploading the source diagram. Source diagrams are autosaved in the
+browser and can also be opened or saved as `.excalidraw` files.
+
+To convert a simple flowchart:
+
+1. Draw rectangles, ellipses, or diamonds and add text labels.
+2. Connect the shapes with arrows.
+3. Choose **Convert** to generate Mermaid source and its SVG preview.
+4. Copy the Mermaid source or download the `.mmd`, SVG, or source diagram.
+
+The first supported workflow is intentionally narrow: flowchart shapes, text,
+arrows, and frames are converted. Unsupported elements in opened files are
+omitted from conversion with a warning.
+
+### Command line
 
 Install dependencies and build the CLI:
 
@@ -111,10 +144,10 @@ done
 
 ## Testing
 
-Run the complete test suite, typecheck, and build:
+Run the unit and real-browser test suites, then typecheck and build:
 
 ```sh
-bun run test
+bun run test:all
 bun run typecheck
 bun run build
 ```
@@ -129,6 +162,20 @@ Run the converter and CLI tests:
 
 ```sh
 bunx vitest run test/convert.test.ts test/cli.test.ts
+```
+
+Run the real-browser workflow test headlessly, or watch it in visible Chromium:
+
+```sh
+bun run test:e2e
+bun run test:e2e:headed
+```
+
+Headed mode slows the browser actions and keeps the final diagram visible for
+three seconds. Override the final pause when needed:
+
+```sh
+E2E_PAUSE_MS=10000 bun run test:e2e:headed
 ```
 
 Bun installs dependencies into the ignored `node_modules/` directory. Generated files under `artifacts/` are also ignored by Git.
