@@ -18,6 +18,22 @@ A deterministic Excalidraw-to-Mermaid converter built from `DESIGN.md` in explic
 
 This project uses [Bun](https://bun.sh/) as the primary package manager and command runner. Bun 1.3 or newer is recommended.
 
+### Interactive workspace
+
+Run the browser-local Excalidraw-to-Mermaid workspace:
+
+```sh
+bun install
+bun run dev
+```
+
+Open `http://127.0.0.1:4173`. The workspace embeds a constrained Excalidraw
+editor, converts the current scene on demand, and renders a Mermaid preview
+without uploading the source diagram. Source diagrams are autosaved in the
+browser and can also be opened or saved as `.excalidraw` files.
+
+### Command line
+
 Install dependencies and build the CLI:
 
 ```sh
@@ -129,6 +145,20 @@ Run the converter and CLI tests:
 
 ```sh
 bunx vitest run test/convert.test.ts test/cli.test.ts
+```
+
+Run the real-browser workflow test headlessly, or watch it in visible Chromium:
+
+```sh
+bun run test:e2e
+bun run test:e2e:headed
+```
+
+Headed mode slows the browser actions and keeps the final diagram visible for
+three seconds. Override the final pause when needed:
+
+```sh
+E2E_PAUSE_MS=10000 bun run test:e2e:headed
 ```
 
 Bun installs dependencies into the ignored `node_modules/` directory. Generated files under `artifacts/` are also ignored by Git.
