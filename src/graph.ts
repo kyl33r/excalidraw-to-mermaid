@@ -93,7 +93,11 @@ export function buildDiagramGraph(
   const elementById = new Map(elements.map((element) => [element.id, element]));
   const frames = elements.filter(({ type }) => type === "frame");
   const frameIdMap = new Map(frames.map((frame) => [frame.id, groupId(frame.id)]));
-  const groupSourceIds = new Set(elements.flatMap(({ groupIds }) => groupIds ?? []));
+  const groupSourceIds = new Set(
+    elements
+      .filter(({ frameId }) => frameId === undefined)
+      .flatMap(({ groupIds }) => groupIds ?? []),
+  );
   const groupIdMap = new Map(
     [...groupSourceIds].map((sourceId) => [sourceId, groupId(sourceId)]),
   );
@@ -118,7 +122,10 @@ export function buildDiagramGraph(
     };
   });
   const inferredGroups: GraphGroup[] = [...groupSourceIds].map((sourceId) => {
-    const members = elements.filter(({ groupIds }) => groupIds?.includes(sourceId));
+    const members = elements.filter(
+      ({ frameId, groupIds }) =>
+        frameId === undefined && groupIds?.includes(sourceId),
+    );
     const standaloneLabel = members
       .filter(({ type, containerId, text }) => type === "text" && !containerId && text)
       .sort((left, right) => left.bounds.y - right.bounds.y || left.bounds.x - right.bounds.x)[0]
