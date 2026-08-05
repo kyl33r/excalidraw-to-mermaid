@@ -24,6 +24,9 @@ and keeps the diagram local to your browser.
 
 This project uses [Bun](https://bun.sh/) as the primary package manager and command runner. Bun 1.3 or newer is recommended.
 
+Use the hosted Conversion Workspace at
+[excali2md.vercel.app](https://excali2md.vercel.app).
+
 ### Interactive workspace
 
 Run the browser-local Excalidraw-to-Mermaid workspace:
@@ -48,6 +51,18 @@ To convert a simple flowchart:
 The first supported workflow is intentionally narrow: flowchart shapes, text,
 arrows, and frames are converted. Unsupported elements in opened files are
 omitted from conversion with a warning.
+
+### Built-in templates
+
+The workspace includes ready-to-convert examples for common professional
+setups: request flowcharts, branching order logic, framed authentication
+processes, service interaction sequences, ERD-style data models, and a
+23-node agent-system architecture. Choose one from **Start from a template**,
+then select **Convert**.
+
+Sequence and ERD-style templates currently convert to Mermaid **flowcharts**:
+they demonstrate connected interaction and relationship graphs, rather than
+claiming a native `sequenceDiagram` or `erDiagram` export mode.
 
 ### Command line
 
@@ -179,6 +194,20 @@ E2E_PAUSE_MS=10000 bun run test:e2e:headed
 ```
 
 Bun installs dependencies into the ignored `node_modules/` directory. Generated files under `artifacts/` are also ignored by Git.
+
+## Deployment
+
+Authenticate with Vercel once, then run the production deployment script:
+
+```sh
+bunx vercel login
+./deploy.sh
+```
+
+The script installs the locked dependencies, runs the unit and browser tests,
+typechecks and builds the project, then creates a production deployment. On a
+new checkout, it also prompts you to link the correct Vercel project. Vercel's
+local project metadata stays in the ignored `.vercel/` directory.
 
 ## Design document status
 

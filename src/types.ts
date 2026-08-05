@@ -42,6 +42,7 @@ export interface GraphEdge {
 export interface GraphGroup {
   id: string;
   label?: string;
+  parentGroupId?: string;
   childNodeIds: string[];
   bounds: Bounds;
 }
