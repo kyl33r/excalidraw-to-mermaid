@@ -8,7 +8,10 @@ export interface CliIo {
   stderr: (message: string) => void;
 }
 
-const USAGE = "Usage: excali2md <input.excalidraw> <output.mmd>";
+const USAGE = [
+  "Usage: excali2md <input.excalidraw> <output.mmd>",
+  "       excali2md --json <input.excalidraw>",
+].join("\n");
 
 export async function runCli(
   args: string[],
@@ -17,15 +20,44 @@ export async function runCli(
     stderr: (message) => console.error(message),
   },
 ): Promise<number> {
-  if (args.length !== 2 || !args[0] || !args[1]) {
+  const jsonMode = args[0] === "--json";
+  const inputPath = jsonMode ? args[1] : args[0];
+  const outputPath = jsonMode ? undefined : args[1];
+  if (
+    (jsonMode && (args.length !== 2 || !inputPath)) ||
+    (!jsonMode && (args.length !== 2 || !inputPath || !outputPath))
+  ) {
+    io.stderr(USAGE);
+    return 2;
+  }
+  if (!inputPath) {
     io.stderr(USAGE);
     return 2;
   }
 
-  const [inputPath, outputPath] = args;
   try {
     const source = await readFile(inputPath, "utf8");
     const result = convertExcalidrawToMermaid(source);
+    if (jsonMode) {
+      io.stdout(
+        JSON.stringify({
+          mermaid: result.mermaid,
+          graph: result.graph,
+          counts: {
+            nodes: result.graph.nodes.length,
+            edges: result.graph.edges.length,
+            groups: result.graph.groups.length,
+            warnings: result.graph.warnings.length,
+          },
+          warnings: result.graph.warnings,
+        }),
+      );
+      return 0;
+    }
+    if (!outputPath) {
+      io.stderr(USAGE);
+      return 2;
+    }
     await mkdir(dirname(outputPath), { recursive: true });
     await writeFile(outputPath, result.mermaid, "utf8");
 

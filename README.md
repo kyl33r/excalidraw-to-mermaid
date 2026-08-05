@@ -88,6 +88,30 @@ The CLI accepts two positional arguments:
 excali2md <input.excalidraw> <output.mmd>
 ```
 
+For agents and other automation, emit one JSON result to standard output
+without writing a Mermaid file:
+
+```sh
+bun run convert -- --json examples/01-basic-flow.excalidraw
+```
+
+The JSON includes `mermaid`, the normalized graph, counts, and structured
+conversion warnings. Treat warnings as part of the result rather than hiding
+them: an ambiguous relationship should be reviewed before acting on it.
+
+### Install as an agent skill
+
+Install the reusable skill from GitHub for Codex or another supported agent:
+
+```sh
+npx skills add kyl33r/excalidraw-to-mermaid \
+  --skill excalidraw-to-mermaid \
+  --agent codex
+```
+
+Use `--global` to make it available in every local project. The skill invokes
+the JSON CLI mode and instructs agents to surface conversion warnings.
+
 The other bundled examples can be converted in the same way:
 
 ```sh

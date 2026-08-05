@@ -46,4 +46,28 @@ describe("runCli", () => {
       "Usage: excali2md <input.excalidraw> <output.mmd>",
     );
   });
+
+  it("returns a machine-readable conversion result with --json", async () => {
+    const stdout: string[] = [];
+    const stderr: string[] = [];
+
+    const exitCode = await runCli(
+      [
+        "--json",
+        new URL("../examples/01-basic-flow.excalidraw", import.meta.url).pathname,
+      ],
+      {
+        stdout: (message) => stdout.push(message),
+        stderr: (message) => stderr.push(message),
+      },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(stderr).toEqual([]);
+    expect(JSON.parse(stdout.join("\n"))).toMatchObject({
+      mermaid: expect.stringContaining("flowchart LR"),
+      counts: { nodes: 4, edges: 3, groups: 0, warnings: 0 },
+      warnings: [],
+    });
+  });
 });

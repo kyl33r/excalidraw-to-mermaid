@@ -52,6 +52,8 @@ fidelity: warn when intent cannot be inferred safely.
 
 ## Product and engineering
 
+- [x] Add an agent-friendly `--json` CLI mode and an auto-discoverable Codex
+  skill for converting Excalidraw files safely.
 - [x] Add a built-in template gallery with flowchart, logic-flow,
   sequence-style, ERD-style, framed-process, and large architecture examples.
 - [ ] Continue expanding end-to-end tests with complex diagrams: labels,
