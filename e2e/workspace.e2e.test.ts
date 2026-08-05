@@ -453,6 +453,7 @@ describe("Conversion Workspace", () => {
     expect(mermaidSource).toContain("Final Answer / Trading<br/>Signal");
     expect(mermaidSource).toContain("subgraph g_subgraph_group_INNER");
     expect(mermaidSource).toContain("subgraph g_subgraph_group_ITER");
+
     expect(pageErrors).toEqual([]);
   });
 });

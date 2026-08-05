@@ -3,6 +3,10 @@ import mermaid from "mermaid";
 let initialized = false;
 let renderSequence = 0;
 
+export function makeSvgXmlSafe(svg: string): string {
+  return svg.replaceAll("<br>", "<br/>");
+}
+
 function initialize(): void {
   if (initialized) {
     return;
@@ -13,7 +17,9 @@ function initialize(): void {
     suppressErrorRendering: true,
     theme: "neutral",
     flowchart: {
-      htmlLabels: true,
+      // SVG downloads must be standalone XML documents. HTML labels produce
+      // browser-tolerated foreignObject markup that is not reliably valid XML.
+      htmlLabels: false,
       useMaxWidth: true,
     },
   });
@@ -28,5 +34,8 @@ export async function renderMermaid(source: string): Promise<string> {
     `excali2md-preview-${renderSequence}`,
     source,
   );
-  return result.svg;
+  // Mermaid can emit HTML-style `<br>` tags inside SVG labels. Browsers render
+  // them in the preview, but a downloaded SVG is parsed as XML and requires
+  // self-closing tags.
+  return makeSvgXmlSafe(result.svg);
 }
