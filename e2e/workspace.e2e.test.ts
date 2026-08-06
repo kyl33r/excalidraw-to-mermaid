@@ -285,6 +285,10 @@ describe("Conversion Workspace", () => {
         (element) => element.textContent ?? "",
       );
       expect(mermaidSource).toContain(template.label);
+      if (template.id === "sequence-flow") {
+        expect(mermaidSource).toContain("sequenceDiagram");
+        expect(mermaidSource).toContain("Place order");
+      }
       expect(pageErrors).toEqual([]);
     }
   });
