@@ -2,12 +2,14 @@ import agentArchitecture from "../examples/04-quant-agent.excalidraw?raw";
 import authenticationFlow from "../examples/03-grouped-process.excalidraw?raw";
 import orderLogic from "../examples/02-branching-flow.excalidraw?raw";
 import requestFlow from "../examples/01-basic-flow.excalidraw?raw";
+import type { DiagramMode } from "../src/types.js";
 
 export interface WorkspaceTemplate {
   id: string;
   title: string;
   description: string;
   source: string;
+  mode?: DiagramMode;
 }
 
 interface TemplateElement {
@@ -86,6 +88,10 @@ function arrow(id: string, sourceId: string, targetId: string, x: number, y: num
   };
 }
 
+function message(id: string, x: number, y: number, text: string): TemplateElement {
+  return { ...baseElement(`${id}-label`, "text", x, y, 120, 24), text, originalText: text, containerId: id, fontSize: 18, fontFamily: 1, textAlign: "center", verticalAlign: "middle", autoResize: true, lineHeight: 1.25 };
+}
+
 function scene(elements: TemplateElement[]): string {
   return JSON.stringify({ type: "excalidraw", version: 2, elements });
 }
@@ -95,9 +101,9 @@ const sequenceFlow = scene([
   ...node("sequence-api", 310, 140, "API"),
   ...node("sequence-service", 560, 140, "Order service"),
   ...node("sequence-store", 810, 140, "Data store"),
-  arrow("sequence-a1", "sequence-client", "sequence-api", 240, 182, 70),
-  arrow("sequence-a2", "sequence-api", "sequence-service", 490, 182, 70),
-  arrow("sequence-a3", "sequence-service", "sequence-store", 740, 182, 70),
+  arrow("sequence-a1", "sequence-client", "sequence-api", 240, 250, 70), message("sequence-a1", 210, 220, "Place order"),
+  arrow("sequence-a2", "sequence-api", "sequence-service", 490, 330, 70), message("sequence-a2", 460, 300, "Create order"),
+  arrow("sequence-a3", "sequence-service", "sequence-store", 740, 410, 70), message("sequence-a3", 710, 380, "Persist order"),
 ]);
 
 const dataModel = scene([
@@ -130,8 +136,9 @@ export const WORKSPACE_TEMPLATES: readonly WorkspaceTemplate[] = [
   {
     id: "sequence-flow",
     title: "Service interaction sequence",
-    description: "A sequence-style interaction shown as a connected flowchart.",
+    description: "A true Mermaid sequence diagram with ordered participants and messages.",
     source: sequenceFlow,
+    mode: "sequence",
   },
   {
     id: "data-model",

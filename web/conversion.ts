@@ -1,6 +1,7 @@
 import { convertExcalidrawToMermaid } from "../src/convert.js";
 import type {
   ConversionWarning,
+  DiagramMode,
   MermaidConversionResult,
 } from "../src/index.js";
 
@@ -79,6 +80,7 @@ export function hasConvertibleNode(serializedScene: string): boolean {
 
 export function convertWorkspaceScene(
   serializedScene: string,
+  mode: DiagramMode = "flowchart",
 ): WorkspaceConversionResult {
   const scene = parseScene(serializedScene);
   const warnings = unsupportedWarnings(scene.elements);
@@ -90,6 +92,7 @@ export function convertWorkspaceScene(
   );
   const conversion = convertExcalidrawToMermaid(
     JSON.stringify({ ...scene, elements: supportedElements }),
+    { mode },
   );
   conversion.graph.warnings = [...conversion.graph.warnings, ...warnings];
   return { ...conversion, unsupportedWarnings: warnings };

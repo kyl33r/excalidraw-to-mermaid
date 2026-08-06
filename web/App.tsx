@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 
-import type { ConversionWarning } from "../src/types.js";
+import type { ConversionWarning, DiagramMode } from "../src/types.js";
 import {
   convertWorkspaceScene,
   hasConvertibleNode,
@@ -114,6 +114,7 @@ export default function App() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [persistenceError, setPersistenceError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [diagramMode, setDiagramMode] = useState<DiagramMode>("flowchart");
   const [selectedTemplateId, setSelectedTemplateId] = useState(
     WORKSPACE_TEMPLATES[0]?.id ?? "",
   );
@@ -199,7 +200,7 @@ export default function App() {
       api.getSceneElementsIncludingDeleted(),
     );
     try {
-      const conversion = convertWorkspaceScene(serializeScene(api));
+      const conversion = convertWorkspaceScene(serializeScene(api), diagramMode);
       const { renderMermaid } = await import("./mermaid-renderer.js");
       const svg = await renderMermaid(conversion.mermaid);
       setResult({
@@ -218,7 +219,7 @@ export default function App() {
     } finally {
       setIsConverting(false);
     }
-  }, [api, isConverting]);
+  }, [api, diagramMode, isConverting]);
 
   const handleNew = useCallback(() => {
     if (!api) {
@@ -299,6 +300,7 @@ export default function App() {
         captureUpdate: CaptureUpdateAction.IMMEDIATELY,
       });
       api.history.clear();
+      setDiagramMode(template.mode ?? "flowchart");
       void api.scrollToContent(restored.elements, { fitToContent: true });
       setResult(null);
       setConversionError(null);
@@ -384,6 +386,11 @@ export default function App() {
             </div>
           </div>
           <div className="template-bar" aria-label="Diagram templates">
+            <label htmlFor="diagram-mode">Output</label>
+            <select id="diagram-mode" data-testid="diagram-mode" value={diagramMode} onChange={(event) => setDiagramMode(event.target.value as DiagramMode)} disabled={!api}>
+              <option value="flowchart">Flowchart</option>
+              <option value="sequence">Sequence diagram</option>
+            </select>
             <label htmlFor="template-select">Start from a template</label>
             <select
               id="template-select"
