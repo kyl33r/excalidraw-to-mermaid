@@ -16,4 +16,24 @@ describe("sequence conversion", () => {
     expect(result.mermaid).toBe(["sequenceDiagram", "  participant n_client as Client", "  participant n_api as API", "  n_client->>n_api: Request", "  n_api-->>n_client: Response", ""].join("\n"));
     expect(result.graph.warnings).toEqual([]);
   });
+
+  it("omits invalid messages with explicit sequence warnings", () => {
+    const result = convertExcalidrawToMermaid(JSON.stringify({ type: "excalidraw", elements: [
+      { id: "left", type: "rectangle", x: 0, y: 0, width: 100, height: 50 },
+      { id: "left-text", type: "text", x: 5, y: 5, width: 80, height: 20, text: "Left", containerId: "left" },
+      { id: "right", type: "rectangle", x: 240, y: 0, width: 100, height: 50 },
+      { id: "right-text", type: "text", x: 245, y: 5, width: 80, height: 20, text: "Right", containerId: "right" },
+      { id: "unlabelled", type: "arrow", x: 100, y: 100, width: 140, height: 0, points: [[0, 0], [140, 0]], startBinding: { elementId: "left" }, endBinding: { elementId: "right" } },
+      { id: "line", type: "line", x: 100, y: 150, width: 140, height: 0, points: [[0, 0], [140, 0]], startBinding: { elementId: "left" }, endBinding: { elementId: "right" } },
+      { id: "self", type: "arrow", x: 30, y: 200, width: 40, height: 0, points: [[0, 0], [40, 0]], startBinding: { elementId: "left" }, endBinding: { elementId: "left" } },
+      { id: "self-label", type: "text", x: 30, y: 180, width: 80, height: 20, text: "Retry", containerId: "self" },
+    ] }), { mode: "sequence" });
+
+    expect(result.sequence?.messages).toEqual([]);
+    expect(result.graph.warnings.map(({ code, elementIds }) => ({ code, elementIds }))).toEqual([
+      { code: "sequence-omitted-message", elementIds: ["unlabelled"] },
+      { code: "sequence-omitted-message", elementIds: ["line"] },
+      { code: "sequence-ambiguous-message", elementIds: ["self", "self-label"] },
+    ]);
+  });
 });

@@ -65,9 +65,35 @@ describe("runCli", () => {
     expect(exitCode).toBe(0);
     expect(stderr).toEqual([]);
     expect(JSON.parse(stdout.join("\n"))).toMatchObject({
+      mode: "flowchart",
       mermaid: expect.stringContaining("flowchart LR"),
       counts: { nodes: 4, edges: 3, groups: 0, warnings: 0 },
       warnings: [],
+    });
+  });
+
+  it("selects sequence output with --mode in JSON mode", async () => {
+    const stdout: string[] = [];
+    const stderr: string[] = [];
+
+    const exitCode = await runCli(
+      [
+        "--json",
+        "--mode",
+        "sequence",
+        new URL("../examples/01-basic-flow.excalidraw", import.meta.url).pathname,
+      ],
+      {
+        stdout: (message) => stdout.push(message),
+        stderr: (message) => stderr.push(message),
+      },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(stderr).toEqual([]);
+    expect(JSON.parse(stdout.join("\n"))).toMatchObject({
+      mode: "sequence",
+      mermaid: expect.stringContaining("sequenceDiagram"),
     });
   });
 });

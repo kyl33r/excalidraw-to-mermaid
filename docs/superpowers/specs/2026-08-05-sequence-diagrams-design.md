@@ -19,7 +19,7 @@ the default and is unchanged.
 
 ## Output
 
-- Participants render as `participant id as "Label"`.
+- Participants render as `participant id as Label`.
 - Calls render as `sender->>receiver: Message`.
 - Returns render as `sender-->>receiver: Message`.
 - Mermaid identifiers are deterministic and distinct from display labels.

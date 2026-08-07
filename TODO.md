@@ -39,6 +39,12 @@ fidelity: warn when intent cannot be inferred safely.
 
 ## Diagram semantics and fidelity
 
+- [x] Add an explicit Mermaid `sequenceDiagram` mode with a constrained,
+  documented authoring convention, browser selector, CLI flag, template, and
+  conversion warnings.
+- [ ] Extend sequence mode with Mermaid-specific constructs such as activation
+  bars, notes, and `alt`/`opt`/`loop` fragments, each behind explicit
+  Excalidraw conventions rather than heuristic inference.
 - [ ] Add the optional Mermaid `stateDiagram-v2` output mode described in
   `DESIGN.md`, enabled only by an explicit user choice or strict detection.
 - [ ] Improve frame extraction for nested frames and mixed inside/outside

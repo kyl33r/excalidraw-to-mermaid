@@ -269,6 +269,13 @@ describe("Conversion Workspace", () => {
       const pageErrors = capturePageErrors();
       await openEmptyWorkspace();
       await loadTemplate(template.id);
+      const selectedMode = await page.$eval(
+        '[data-testid="diagram-mode"]',
+        (element) => (element as HTMLSelectElement).value,
+      );
+      expect(selectedMode).toBe(
+        template.id === "sequence-flow" ? "sequence" : "flowchart",
+      );
       await page.click("button.convert-button");
       await page.waitForSelector(".mermaid-preview svg", { visible: true });
 
