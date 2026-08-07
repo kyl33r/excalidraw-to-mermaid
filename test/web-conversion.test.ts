@@ -99,4 +99,30 @@ describe("workspace conversion", () => {
       },
     ]);
   });
+
+  it("keeps workspace warnings on the sequence result as well as the graph", () => {
+    const result = convertWorkspaceScene(
+      JSON.stringify({
+        type: "excalidraw",
+        elements: [
+          element("left", "rectangle"),
+          element("left-text", "text", {
+            text: "Left",
+            containerId: "left",
+            x: 5,
+            y: 5,
+            width: 80,
+            height: 20,
+          }),
+          element("image", "image"),
+        ],
+      }),
+      "sequence",
+    );
+
+    expect(result.sequence?.warnings).toEqual(result.graph.warnings);
+    expect(result.sequence?.warnings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "unsupported-source-element", elementIds: ["image"] }),
+    ]));
+  });
 });

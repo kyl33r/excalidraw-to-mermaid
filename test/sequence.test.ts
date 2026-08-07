@@ -36,4 +36,50 @@ describe("sequence conversion", () => {
       { code: "sequence-ambiguous-message", elementIds: ["self", "self-label"] },
     ]);
   });
+
+  it("uses the arrow path midpoint to order bent messages", () => {
+    const result = convertExcalidrawToMermaid(JSON.stringify({ type: "excalidraw", elements: [
+      { id: "left", type: "rectangle", x: 0, y: 0, width: 100, height: 50 },
+      { id: "left-text", type: "text", x: 5, y: 5, width: 80, height: 20, text: "Left", containerId: "left" },
+      { id: "right", type: "rectangle", x: 240, y: 0, width: 100, height: 50 },
+      { id: "right-text", type: "text", x: 245, y: 5, width: 80, height: 20, text: "Right", containerId: "right" },
+      { id: "a-bent", type: "arrow", x: 100, y: 0, width: 140, height: 200, points: [[0, 0], [0, 200], [140, 200], [140, 0]], startBinding: { elementId: "left" }, endBinding: { elementId: "right" } },
+      { id: "a-bent-label", type: "text", x: 100, y: 80, width: 80, height: 20, text: "Later", containerId: "a-bent" },
+      { id: "z-straight", type: "arrow", x: 100, y: 100, width: 140, height: 0, points: [[0, 0], [140, 0]], startBinding: { elementId: "left" }, endBinding: { elementId: "right" } },
+      { id: "z-straight-label", type: "text", x: 100, y: 80, width: 80, height: 20, text: "Earlier", containerId: "z-straight" },
+    ] }), { mode: "sequence" });
+
+    expect(result.sequence?.messages.map(({ label }) => label)).toEqual([
+      "Earlier",
+      "Later",
+    ]);
+  });
+
+  it("uses a valid fallback for empty participant labels and preserves endpoint warnings", () => {
+    const result = convertExcalidrawToMermaid(JSON.stringify({ type: "excalidraw", elements: [
+      { id: "empty", type: "rectangle", x: 0, y: 0, width: 100, height: 50 },
+      { id: "empty-text", type: "text", x: 5, y: 5, width: 80, height: 20, text: "", containerId: "empty" },
+      { id: "right", type: "rectangle", x: 240, y: 0, width: 100, height: 50 },
+      { id: "right-text", type: "text", x: 245, y: 5, width: 80, height: 20, text: "Right", containerId: "right" },
+      { id: "missing-endpoint", type: "arrow", x: 100, y: 100, width: 140, height: 0, points: [[0, 0], [140, 0]], startBinding: { elementId: "empty" }, endBinding: { elementId: "missing" } },
+    ] }), { mode: "sequence" });
+
+    expect(result.mermaid).toContain("participant n_empty as Unnamed participant 1");
+    expect(result.graph.warnings.map(({ code }) => code)).toContain("sequence-generated-participant-label");
+    expect(result.graph.warnings.map(({ code }) => code)).toContain("unresolved-edge-endpoint");
+  });
+
+  it("omits messages between vertically aligned participants as horizontally ambiguous", () => {
+    const result = convertExcalidrawToMermaid(JSON.stringify({ type: "excalidraw", elements: [
+      { id: "top", type: "rectangle", x: 0, y: 0, width: 100, height: 50 },
+      { id: "top-text", type: "text", x: 5, y: 5, width: 80, height: 20, text: "Top", containerId: "top" },
+      { id: "bottom", type: "rectangle", x: 0, y: 200, width: 100, height: 50 },
+      { id: "bottom-text", type: "text", x: 5, y: 205, width: 80, height: 20, text: "Bottom", containerId: "bottom" },
+      { id: "vertical", type: "arrow", x: 50, y: 50, width: 0, height: 150, points: [[0, 0], [0, 150]], startBinding: { elementId: "top" }, endBinding: { elementId: "bottom" } },
+      { id: "vertical-label", type: "text", x: 60, y: 100, width: 80, height: 20, text: "Ambiguous", containerId: "vertical" },
+    ] }), { mode: "sequence" });
+
+    expect(result.sequence?.messages).toEqual([]);
+    expect(result.graph.warnings.map(({ code }) => code)).toContain("sequence-ambiguous-message");
+  });
 });

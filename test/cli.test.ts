@@ -94,6 +94,9 @@ describe("runCli", () => {
     expect(JSON.parse(stdout.join("\n"))).toMatchObject({
       mode: "sequence",
       mermaid: expect.stringContaining("sequenceDiagram"),
+      warnings: expect.arrayContaining([
+        expect.objectContaining({ code: "sequence-omitted-message" }),
+      ]),
     });
   });
 });

@@ -94,6 +94,10 @@ export function convertWorkspaceScene(
     JSON.stringify({ ...scene, elements: supportedElements }),
     { mode },
   );
-  conversion.graph.warnings = [...conversion.graph.warnings, ...warnings];
+  const allWarnings = [...conversion.graph.warnings, ...warnings];
+  conversion.graph.warnings = allWarnings;
+  if (conversion.sequence) {
+    conversion.sequence.warnings = allWarnings;
+  }
   return { ...conversion, unsupportedWarnings: warnings };
 }
