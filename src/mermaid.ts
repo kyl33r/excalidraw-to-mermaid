@@ -51,19 +51,33 @@ export function generateMermaid(graph: DiagramGraph): string {
   const lines = [`flowchart ${graph.direction}`];
   const nodesById = new Map(graph.nodes.map((node) => [node.id, node]));
   const renderedNodeIds = new Set<string>();
+  const groupsByParent = new Map<string | undefined, typeof graph.groups>();
+  for (const group of graph.groups) {
+    const siblings = groupsByParent.get(group.parentGroupId) ?? [];
+    siblings.push(group);
+    groupsByParent.set(group.parentGroupId, siblings);
+  }
 
-  for (const group of [...graph.groups].sort(compareBounds)) {
-    lines.push(`  subgraph ${group.id}["${escapeLabel(group.label ?? group.id)}"]`);
-    lines.push(`    direction ${graph.direction}`);
+  function renderGroup(group: (typeof graph.groups)[number], depth: number): void {
+    const indent = "  ".repeat(depth);
+    lines.push(`${indent}subgraph ${group.id}["${escapeLabel(group.label ?? group.id)}"]`);
+    lines.push(`${indent}  direction ${graph.direction}`);
     const children = group.childNodeIds
       .map((id) => nodesById.get(id))
       .filter((node): node is GraphNode => node !== undefined)
       .sort(compareBounds);
     for (const node of children) {
-      lines.push(`    ${renderNode(node)}`);
+      lines.push(`${indent}  ${renderNode(node)}`);
       renderedNodeIds.add(node.id);
     }
-    lines.push("  end");
+    for (const childGroup of [...(groupsByParent.get(group.id) ?? [])].sort(compareBounds)) {
+      renderGroup(childGroup, depth + 1);
+    }
+    lines.push(`${indent}end`);
+  }
+
+  for (const group of [...(groupsByParent.get(undefined) ?? [])].sort(compareBounds)) {
+    renderGroup(group, 1);
   }
 
   for (const node of [...graph.nodes].sort(compareBounds)) {

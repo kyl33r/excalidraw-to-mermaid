@@ -1,0 +1,4 @@
+interface:
+  display_name: "Excalidraw to Mermaid"
+  short_description: "Convert Excalidraw diagrams to Mermaid safely."
+  default_prompt: "Convert this Excalidraw file to Mermaid and report conversion warnings."

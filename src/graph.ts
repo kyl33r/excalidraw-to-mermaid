@@ -20,6 +20,14 @@ function groupId(sourceId: string): string {
   return `g_${sourceId.replace(/[^A-Za-z0-9_]/g, "_")}`;
 }
 
+function boundsFor(elements: NormalizedElement[]): NormalizedElement["bounds"] {
+  const left = Math.min(...elements.map(({ bounds }) => bounds.x));
+  const top = Math.min(...elements.map(({ bounds }) => bounds.y));
+  const right = Math.max(...elements.map(({ bounds }) => bounds.x + bounds.width));
+  const bottom = Math.max(...elements.map(({ bounds }) => bounds.y + bounds.height));
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
 function median(values: number[]): number {
   if (values.length === 0) {
     return 0;
@@ -85,14 +93,24 @@ export function buildDiagramGraph(
   const elementById = new Map(elements.map((element) => [element.id, element]));
   const frames = elements.filter(({ type }) => type === "frame");
   const frameIdMap = new Map(frames.map((frame) => [frame.id, groupId(frame.id)]));
+  const groupSourceIds = new Set(
+    elements
+      .filter(({ frameId }) => frameId === undefined)
+      .flatMap(({ groupIds }) => groupIds ?? []),
+  );
+  const groupIdMap = new Map(
+    [...groupSourceIds].map((sourceId) => [sourceId, groupId(sourceId)]),
+  );
   const nodes = labels.nodes.map((node) => {
     const source = elementById.get(node.sourceElementIds[0] ?? "");
     const parentGroupId = source?.frameId
       ? frameIdMap.get(source.frameId)
-      : undefined;
+      : source?.groupIds?.[0]
+        ? groupIdMap.get(source.groupIds[0])
+        : undefined;
     return parentGroupId ? { ...node, parentGroupId } : node;
   });
-  const groups: GraphGroup[] = frames.map((frame) => {
+  const frameGroups: GraphGroup[] = frames.map((frame) => {
     const id = frameIdMap.get(frame.id) ?? groupId(frame.id);
     return {
       id,
@@ -103,6 +121,44 @@ export function buildDiagramGraph(
       bounds: { ...frame.bounds },
     };
   });
+  const inferredGroups: GraphGroup[] = [...groupSourceIds].map((sourceId) => {
+    const members = elements.filter(
+      ({ frameId, groupIds }) =>
+        frameId === undefined && groupIds?.includes(sourceId),
+    );
+    const standaloneLabel = members
+      .filter(({ type, containerId, text }) => type === "text" && !containerId && text)
+      .sort((left, right) => left.bounds.y - right.bounds.y || left.bounds.x - right.bounds.x)[0]
+      ?.text;
+    const label = nodes
+      .filter((node) =>
+        node.sourceElementIds.some((id) =>
+          elementById.get(id)?.groupIds?.includes(sourceId),
+        ),
+      )
+      .sort((left, right) => left.bounds.y - right.bounds.y || left.bounds.x - right.bounds.x)[0]
+      ?.label ?? standaloneLabel;
+    const nestedMember = members.find(({ groupIds }) => {
+      const index = groupIds?.indexOf(sourceId) ?? -1;
+      return index >= 0 && groupIds?.[index + 1] !== undefined;
+    });
+    const index = nestedMember?.groupIds?.indexOf(sourceId) ?? -1;
+    const parentSourceId = index >= 0 ? nestedMember?.groupIds?.[index + 1] : undefined;
+    const parentGroupId = parentSourceId
+      ? groupIdMap.get(parentSourceId)
+      : undefined;
+    const id = groupIdMap.get(sourceId) ?? groupId(sourceId);
+    return {
+      id,
+      label: label ?? sourceId,
+      ...(parentGroupId ? { parentGroupId } : {}),
+      childNodeIds: nodes
+        .filter(({ parentGroupId }) => parentGroupId === id)
+        .map(({ id: nodeId }) => nodeId),
+      bounds: boundsFor(members),
+    };
+  });
+  const groups = [...frameGroups, ...inferredGroups];
 
   return {
     id: "diagram",

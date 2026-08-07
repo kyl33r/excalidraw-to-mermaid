@@ -1,7 +1,7 @@
 # excali2md
 
-Draw an Excalidraw flowchart and turn it into deterministic Mermaid source,
-directly in the browser or from the command line.
+Draw an Excalidraw flowchart or constrained sequence diagram and turn it into
+deterministic Mermaid source, directly in the browser or from the command line.
 
 The interactive workspace embeds Excalidraw, renders a Mermaid SVG preview,
 and keeps the diagram local to your browser.
@@ -15,6 +15,7 @@ and keeps the diagram local to your browser.
 - Explicit and conservative geometric arrow endpoint resolution.
 - Frame-to-subgraph conversion and graph-direction inference.
 - Escaped, deterministic Mermaid flowchart generation.
+- Explicit Mermaid `sequenceDiagram` generation for ordered, labelled arrows.
 - Embedded browser editor with Mermaid source and SVG previews.
 - Open/save `.excalidraw` files and download `.mmd` or SVG output.
 - Minimal file-in/file-out CLI.
@@ -23,6 +24,9 @@ and keeps the diagram local to your browser.
 ## Quickstart
 
 This project uses [Bun](https://bun.sh/) as the primary package manager and command runner. Bun 1.3 or newer is recommended.
+
+Use the hosted Conversion Workspace at
+[excali2md.vercel.app](https://excali2md.vercel.app).
 
 ### Interactive workspace
 
@@ -49,6 +53,25 @@ The first supported workflow is intentionally narrow: flowchart shapes, text,
 arrows, and frames are converted. Unsupported elements in opened files are
 omitted from conversion with a warning.
 
+For a sequence diagram, select **Sequence diagram** under **Output**. Place
+labelled node shapes from left to right as participants, then connect them with
+labelled arrows from top to bottom. Right-pointing arrows are calls and
+left-pointing arrows are returns. Sequence mode deliberately omits unlabelled,
+undirected, self-directed, and horizontally ambiguous messages with warnings;
+frames and groups do not affect its output.
+
+### Built-in templates
+
+The workspace includes ready-to-convert examples for common professional
+setups: request flowcharts, branching order logic, framed authentication
+processes, service interaction sequences, ERD-style data models, and a
+23-node agent-system architecture. Choose one from **Start from a template**,
+then select **Convert**.
+
+The service interaction template selects the native Mermaid `sequenceDiagram`
+mode. The ERD-style template remains a flowchart: native Mermaid `erDiagram`
+output is not supported yet.
+
 ### Command line
 
 Install dependencies and build the CLI:
@@ -67,11 +90,49 @@ bun run convert -- \
   artifacts/01-basic-flow.mmd
 ```
 
-The CLI accepts two positional arguments:
+The flowchart CLI accepts two positional arguments:
 
 ```text
 excali2md <input.excalidraw> <output.mmd>
 ```
+
+Select sequence output explicitly with `--mode sequence`:
+
+```sh
+bun run convert -- --mode sequence \
+  examples/01-basic-flow.excalidraw \
+  artifacts/interaction.mmd
+```
+
+For agents and other automation, emit one JSON result to standard output
+without writing a Mermaid file:
+
+```sh
+bun run convert -- --json examples/01-basic-flow.excalidraw
+```
+
+The mode flag works with JSON output too:
+
+```sh
+bun run convert -- --json --mode sequence examples/01-basic-flow.excalidraw
+```
+
+The JSON includes `mermaid`, the normalized graph, counts, and structured
+conversion warnings. Treat warnings as part of the result rather than hiding
+them: an ambiguous relationship should be reviewed before acting on it.
+
+### Install as an agent skill
+
+Install the reusable skill from GitHub for Codex or another supported agent:
+
+```sh
+npx skills add kyl33r/excalidraw-to-mermaid \
+  --skill excalidraw-to-mermaid \
+  --agent codex
+```
+
+Use `--global` to make it available in every local project. The skill invokes
+the JSON CLI mode and instructs agents to surface conversion warnings.
 
 The other bundled examples can be converted in the same way:
 
@@ -179,6 +240,20 @@ E2E_PAUSE_MS=10000 bun run test:e2e:headed
 ```
 
 Bun installs dependencies into the ignored `node_modules/` directory. Generated files under `artifacts/` are also ignored by Git.
+
+## Deployment
+
+Authenticate with Vercel once, then run the production deployment script:
+
+```sh
+bunx vercel login
+./deploy.sh
+```
+
+The script installs the locked dependencies, runs the unit and browser tests,
+typechecks and builds the project, then creates a production deployment. On a
+new checkout, it also prompts you to link the correct Vercel project. Vercel's
+local project metadata stays in the ignored `.vercel/` directory.
 
 ## Design document status
 

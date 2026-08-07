@@ -126,6 +126,30 @@ button {
   flex-wrap: wrap;
 }
 
+.template-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-bottom: 1px solid rgba(44, 57, 48, 0.1);
+  color: #59665d;
+  background: rgba(239, 243, 235, 0.72);
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+.template-bar select {
+  min-width: 0;
+  flex: 1;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid rgba(43, 56, 47, 0.15);
+  border-radius: 8px;
+  color: #344039;
+  background: #fbfcf8;
+  font: inherit;
+}
+
 .button {
   min-height: 34px;
   padding: 7px 11px;
@@ -524,9 +548,15 @@ button {
   }
 
   .panel-header,
-  .source-footer {
+  .source-footer,
+  .template-bar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .template-bar select,
+  .template-bar .button {
+    width: 100%;
   }
 
   .canvas-wrap {

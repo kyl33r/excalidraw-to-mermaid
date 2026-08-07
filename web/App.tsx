@@ -21,12 +21,13 @@ import {
   useState,
 } from "react";
 
-import type { ConversionWarning } from "../src/types.js";
+import type { ConversionWarning, DiagramMode } from "../src/types.js";
 import {
   convertWorkspaceScene,
   hasConvertibleNode,
 } from "./conversion.js";
 import { downloadText } from "./files.js";
+import { WORKSPACE_TEMPLATES } from "./templates.js";
 
 const STORAGE_KEY = "excali2md.source-diagram.v1";
 const SAVE_DELAY_MS = 300;
@@ -92,7 +93,6 @@ function blockUnsupportedToolShortcut(event: KeyboardEvent<HTMLDivElement>) {
     "7",
     "9",
     "e",
-    "f",
     "k",
     "l",
     "p",
@@ -114,6 +114,10 @@ export default function App() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [persistenceError, setPersistenceError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [diagramMode, setDiagramMode] = useState<DiagramMode>("flowchart");
+  const [selectedTemplateId, setSelectedTemplateId] = useState(
+    WORKSPACE_TEMPLATES[0]?.id ?? "",
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<number | null>(null);
   const pendingSceneRef = useRef<string | null>(null);
@@ -196,7 +200,7 @@ export default function App() {
       api.getSceneElementsIncludingDeleted(),
     );
     try {
-      const conversion = convertWorkspaceScene(serializeScene(api));
+      const conversion = convertWorkspaceScene(serializeScene(api), diagramMode);
       const { renderMermaid } = await import("./mermaid-renderer.js");
       const svg = await renderMermaid(conversion.mermaid);
       setResult({
@@ -215,7 +219,7 @@ export default function App() {
     } finally {
       setIsConverting(false);
     }
-  }, [api, isConverting]);
+  }, [api, diagramMode, isConverting]);
 
   const handleNew = useCallback(() => {
     if (!api) {
@@ -266,6 +270,45 @@ export default function App() {
     },
     [api],
   );
+
+  const handleLoadTemplate = useCallback(async () => {
+    if (!api) {
+      return;
+    }
+    const template = WORKSPACE_TEMPLATES.find(
+      ({ id }) => id === selectedTemplateId,
+    );
+    if (!template) {
+      return;
+    }
+    if (
+      api.getSceneElements().length > 0 &&
+      !window.confirm(`Load ${template.title}? Your current source will be replaced.`)
+    ) {
+      return;
+    }
+    try {
+      const restored = await loadFromBlob(
+        new Blob([template.source], { type: "application/json" }),
+        api.getAppState(),
+        api.getSceneElements(),
+      );
+      api.addFiles(Object.values(restored.files));
+      api.updateScene({
+        elements: restored.elements,
+        appState: restored.appState,
+        captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+      });
+      api.history.clear();
+      setDiagramMode(template.mode ?? "flowchart");
+      void api.scrollToContent(restored.elements, { fitToContent: true });
+      setResult(null);
+      setConversionError(null);
+      setActionError(null);
+    } catch (error) {
+      setActionError(`Could not load template: ${errorMessage(error)}`);
+    }
+  }, [api, selectedTemplateId]);
 
   const handleSaveSource = useCallback(() => {
     if (api) {
@@ -342,6 +385,35 @@ export default function App() {
               />
             </div>
           </div>
+          <div className="template-bar" aria-label="Diagram templates">
+            <label htmlFor="diagram-mode">Output</label>
+            <select id="diagram-mode" data-testid="diagram-mode" value={diagramMode} onChange={(event) => setDiagramMode(event.target.value as DiagramMode)} disabled={!api}>
+              <option value="flowchart">Flowchart</option>
+              <option value="sequence">Sequence diagram</option>
+            </select>
+            <label htmlFor="template-select">Start from a template</label>
+            <select
+              id="template-select"
+              data-testid="template-select"
+              value={selectedTemplateId}
+              onChange={(event) => setSelectedTemplateId(event.target.value)}
+              disabled={!api}
+            >
+              {WORKSPACE_TEMPLATES.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.title}
+                </option>
+              ))}
+            </select>
+            <button
+              className="button button-quiet"
+              data-testid="load-template"
+              onClick={() => void handleLoadTemplate()}
+              disabled={!api}
+            >
+              Load template
+            </button>
+          </div>
           <div
             className="canvas-wrap"
             onKeyDownCapture={blockUnsupportedToolShortcut}
@@ -367,7 +439,7 @@ export default function App() {
             />
           </div>
           <div className="source-footer">
-            <span>Rectangle · Ellipse · Diamond · Arrow · Text</span>
+            <span>Rectangle · Ellipse · Diamond · Arrow · Text · Frame</span>
             <span className={persistenceError ? "status-error" : "status-saved"}>
               {persistenceError ?? "Autosaved locally"}
             </span>

@@ -2,13 +2,18 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 import { convertExcalidrawToMermaid } from "./convert.js";
+import type { DiagramMode } from "./types.js";
 
 export interface CliIo {
   stdout: (message: string) => void;
   stderr: (message: string) => void;
 }
 
-const USAGE = "Usage: excali2md <input.excalidraw> <output.mmd>";
+const USAGE = [
+  "Usage: excali2md <input.excalidraw> <output.mmd>",
+  "       excali2md --json <input.excalidraw>",
+  "       excali2md [--json] --mode sequence <input.excalidraw> [output.mmd]",
+].join("\n");
 
 export async function runCli(
   args: string[],
@@ -17,15 +22,56 @@ export async function runCli(
     stderr: (message) => console.error(message),
   },
 ): Promise<number> {
-  if (args.length !== 2 || !args[0] || !args[1]) {
+  const modeFlagIndex = args.indexOf("--mode");
+  const requestedMode = modeFlagIndex === -1 ? "flowchart" : args[modeFlagIndex + 1];
+  if (requestedMode !== "flowchart" && requestedMode !== "sequence") {
+    io.stderr(USAGE);
+    return 2;
+  }
+  const positionalArgs = args.filter(
+    (_, index) =>
+      modeFlagIndex === -1 ||
+      (index !== modeFlagIndex && index !== modeFlagIndex + 1),
+  );
+  const jsonMode = positionalArgs[0] === "--json";
+  const inputPath = jsonMode ? positionalArgs[1] : positionalArgs[0];
+  const outputPath = jsonMode ? undefined : positionalArgs[1];
+  if (
+    (jsonMode && (positionalArgs.length !== 2 || !inputPath)) ||
+    (!jsonMode && (positionalArgs.length !== 2 || !inputPath || !outputPath))
+  ) {
+    io.stderr(USAGE);
+    return 2;
+  }
+  if (!inputPath) {
     io.stderr(USAGE);
     return 2;
   }
 
-  const [inputPath, outputPath] = args;
   try {
     const source = await readFile(inputPath, "utf8");
-    const result = convertExcalidrawToMermaid(source);
+    const result = convertExcalidrawToMermaid(source, { mode: requestedMode as DiagramMode });
+    if (jsonMode) {
+      io.stdout(
+        JSON.stringify({
+          mermaid: result.mermaid,
+          mode: result.mode,
+          graph: result.graph,
+          counts: {
+            nodes: result.graph.nodes.length,
+            edges: result.graph.edges.length,
+            groups: result.graph.groups.length,
+            warnings: result.graph.warnings.length,
+          },
+          warnings: result.graph.warnings,
+        }),
+      );
+      return 0;
+    }
+    if (!outputPath) {
+      io.stderr(USAGE);
+      return 2;
+    }
     await mkdir(dirname(outputPath), { recursive: true });
     await writeFile(outputPath, result.mermaid, "utf8");
 

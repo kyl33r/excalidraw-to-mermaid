@@ -25,6 +25,7 @@ export type {
 export { buildDiagramGraph } from "./graph.js";
 export type { BuildDiagramGraphOptions } from "./graph.js";
 export { generateMermaid } from "./mermaid.js";
+export { buildSequenceDiagram, generateSequenceMermaid } from "./sequence.js";
 export { convertExcalidrawToMermaid } from "./convert.js";
 export type {
   ConvertExcalidrawOptions,
@@ -34,6 +35,7 @@ export type {
   Bounds,
   ConversionWarning,
   DiagramDirection,
+  DiagramMode,
   DiagramGraph,
   GraphEdge,
   GraphGroup,
@@ -41,5 +43,8 @@ export type {
   GraphNodeShape,
   NormalizedElement,
   Point,
+  SequenceDiagram,
+  SequenceMessage,
+  SequenceParticipant,
   WarningSeverity,
 } from "./types.js";

@@ -9,6 +9,7 @@ export interface Bounds extends Point {
 }
 
 export type DiagramDirection = "TB" | "TD" | "BT" | "LR" | "RL";
+export type DiagramMode = "flowchart" | "sequence";
 export type GraphNodeShape = "rectangle" | "ellipse" | "diamond" | "state";
 export type WarningSeverity = "info" | "warning" | "error";
 
@@ -42,6 +43,7 @@ export interface GraphEdge {
 export interface GraphGroup {
   id: string;
   label?: string;
+  parentGroupId?: string;
   childNodeIds: string[];
   bounds: Bounds;
 }
@@ -52,6 +54,28 @@ export interface DiagramGraph {
   nodes: GraphNode[];
   edges: GraphEdge[];
   groups: GraphGroup[];
+  warnings: ConversionWarning[];
+}
+
+export interface SequenceParticipant {
+  id: string;
+  label: string;
+  sourceElementIds: string[];
+  bounds: Bounds;
+}
+
+export interface SequenceMessage {
+  id: string;
+  sourceParticipantId: string;
+  targetParticipantId: string;
+  label: string;
+  kind: "call" | "return";
+  order: number;
+}
+
+export interface SequenceDiagram {
+  participants: SequenceParticipant[];
+  messages: SequenceMessage[];
   warnings: ConversionWarning[];
 }
 

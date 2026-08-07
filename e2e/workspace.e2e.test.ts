@@ -59,6 +59,17 @@ async function openEmptyWorkspace(): Promise<void> {
   });
 }
 
+async function loadTemplate(templateId: string): Promise<void> {
+  await page.select('[data-testid="template-select"]', templateId);
+  await page.click('[data-testid="load-template"]');
+  await page.waitForFunction(() => {
+    const convert = document.querySelector<HTMLButtonElement>(
+      "button.convert-button",
+    );
+    return convert !== null && !convert.disabled;
+  });
+}
+
 function capturePageErrors(): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) =>
@@ -232,6 +243,63 @@ describe("Conversion Workspace", () => {
     expect(pageErrors).toEqual([]);
   });
 
+  it("loads and converts professional templates, including sequence-style and ERD-style flows", async () => {
+    const cases = [
+      {
+        id: "sequence-flow",
+        nodes: 4,
+        edges: 3,
+        label: "Order service",
+      },
+      {
+        id: "data-model",
+        nodes: 3,
+        edges: 2,
+        label: "Payment",
+      },
+      {
+        id: "agent-architecture",
+        nodes: 23,
+        edges: 24,
+        label: "Final Answer / Trading",
+      },
+    ];
+
+    for (const template of cases) {
+      const pageErrors = capturePageErrors();
+      await openEmptyWorkspace();
+      await loadTemplate(template.id);
+      const selectedMode = await page.$eval(
+        '[data-testid="diagram-mode"]',
+        (element) => (element as HTMLSelectElement).value,
+      );
+      expect(selectedMode).toBe(
+        template.id === "sequence-flow" ? "sequence" : "flowchart",
+      );
+      await page.click("button.convert-button");
+      await page.waitForSelector(".mermaid-preview svg", { visible: true });
+
+      const resultSummary = await page.$eval(
+        ".result-meta",
+        (element) => element.textContent ?? "",
+      );
+      expect(resultSummary).toContain(`${template.nodes} nodes`);
+      expect(resultSummary).toContain(`${template.edges} edges`);
+
+      await page.click("details.source-code summary");
+      const mermaidSource = await page.$eval(
+        ".source-code code",
+        (element) => element.textContent ?? "",
+      );
+      expect(mermaidSource).toContain(template.label);
+      if (template.id === "sequence-flow") {
+        expect(mermaidSource).toContain("sequenceDiagram");
+        expect(mermaidSource).toContain("Place order");
+      }
+      expect(pageErrors).toEqual([]);
+    }
+  });
+
   it("lets a user open an Excalidraw file and render its Mermaid preview", async () => {
     const pageErrors = capturePageErrors();
     await openEmptyWorkspace();
@@ -383,6 +451,7 @@ describe("Conversion Workspace", () => {
     );
     expect(resultSummary).toContain("23 nodes");
     expect(resultSummary).toContain("24 edges");
+    expect(resultSummary).toContain("6 groups");
     expect(resultSummary).toContain("0 warnings");
 
     await page.click("details.source-code summary");
@@ -393,6 +462,9 @@ describe("Conversion Workspace", () => {
     expect(mermaidSource.match(/-->/g)).toHaveLength(24);
     expect(mermaidSource).toContain("LLM Agents");
     expect(mermaidSource).toContain("Final Answer / Trading<br/>Signal");
+    expect(mermaidSource).toContain("subgraph g_subgraph_group_INNER");
+    expect(mermaidSource).toContain("subgraph g_subgraph_group_ITER");
+
     expect(pageErrors).toEqual([]);
   });
 });
