@@ -28,7 +28,7 @@ body:
     id: actual
     attributes:
       label: Actual Mermaid / behavior
-      description: Include any Conversion Warnings or errors you saw.
+      description: Include any Conversion Warnings you saw.
       render: text
     validations:
       required: true

@@ -14,15 +14,16 @@ versioned section and tags `vX.Y.Z`.
 
 - Deterministic Excalidraw-to-Mermaid flowchart conversion: rectangle,
   ellipse, diamond, and eligible standalone-text node extraction with node
-  and edge label resolution.
+  and connection label resolution.
 - Explicit and conservative geometric arrow endpoint resolution, falling
   back to Excalidraw binding metadata when present.
 - Frame-to-subgraph conversion and graph-direction inference.
-- Escaped, deterministic Mermaid generation with machine-readable warnings
-  for malformed, ambiguous, or omitted content.
+- Escaped, deterministic Mermaid generation with machine-readable Conversion
+  Warnings for malformed, ambiguous, or omitted content.
 - Full `.excalidraw` and clipboard JSON input support with stable input
   errors.
-- Embedded browser editor that renders a live Mermaid SVG preview and keeps
-  the source diagram local to the browser.
-- Open/save `.excalidraw` files and download `.mmd` or SVG output.
+- Embedded browser Conversion Workspace that renders a live Mermaid SVG
+  preview and keeps the source diagram local to the browser.
+- Open/save `.excalidraw` files and download the Generated Diagram (`.mmd` or
+  SVG).
 - Minimal file-in/file-out CLI (`excali2md <input.excalidraw> <output.mmd>`).
