@@ -1,0 +1,55 @@
+name: release
+
+# Cut by scripts/release.sh: it bumps the version, promotes the CHANGELOG
+# [Unreleased] section into a versioned section, and pushes a v* tag. This
+# workflow reuses the CI battery (ci.yml) as its gate on the exact tagged
+# commit, then publishes a GitHub Release whose body is that version's
+# CHANGELOG section.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Gates (test, typecheck, build)
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Publish GitHub Release
+    needs: gates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          NOTES=$(awk -v v="$VERSION" '
+            BEGIN { pat = "^## \\[" v "\\]" }
+            $0 ~ pat { flag=1; next }
+            /^## / { flag=0 }
+            flag
+          ' CHANGELOG.md | sed '/./,$!d')
+          if [ -z "$NOTES" ]; then
+            NOTES="_No CHANGELOG.md entry for v$VERSION — see [CHANGELOG.md](https://github.com/kyl33r/excalidraw-to-mermaid/blob/main/CHANGELOG.md)._"
+          fi
+          {
+            echo "body<<EXCALI2MD_NOTES_EOF"
+            echo "$NOTES"
+            echo "EXCALI2MD_NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: false
+          body: ${{ steps.notes.outputs.body }}
