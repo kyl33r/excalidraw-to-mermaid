@@ -1,0 +1,39 @@
+name: Bug report
+description: Something in excali2md converts or renders incorrectly
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: excali2md version
+      description: Version of the CLI or the Conversion Workspace you are using
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source diagram
+      description: The `.excalidraw` JSON, a description of it, or a link to one. Redact anything sensitive.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Mermaid / behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Mermaid / behavior
+      description: Include any Conversion Warnings or errors you saw.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      render: text
