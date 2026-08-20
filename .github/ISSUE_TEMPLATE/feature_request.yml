@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose a new conversion capability or workflow
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that excali2md does not support today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: What would the new node shape, output mode, or behavior look like?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: How do you work around it today, or what else did you try?
