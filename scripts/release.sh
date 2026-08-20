@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # scripts/release.sh — cut a new excali2md release.
 #
-# Usage: ./scripts/release.sh [patch|minor|major|X.Y.Z] [--wait]
+# Usage: ./scripts/release.sh [patch|minor|major|X.Y.Z]
 #   e.g. ./scripts/release.sh               # patch bump (default)
 #        ./scripts/release.sh minor
 #        ./scripts/release.sh 0.1.0
-#        ./scripts/release.sh patch --wait  # also watch the GH Actions run
 #
 # The release workflow validates server-side: its gates job runs the full
 # battery (test, typecheck, build) on the tagged commit and the publish job
@@ -17,23 +16,11 @@
 
 set -euo pipefail
 
-VERSION_ARG=""
-WAIT_MODE=""
-for arg in "$@"; do
-  case "$arg" in
-    --wait) WAIT_MODE="--wait" ;;
-    -h|--help) sed -n '2,/^$/p' "$0" | head -n 9; exit 0 ;;
-    *)
-      if [ -n "$VERSION_ARG" ]; then
-        echo "Error: too many positional args (got '$VERSION_ARG' and '$arg')" >&2
-        exit 1
-      fi
-      VERSION_ARG="$arg"
-      ;;
-  esac
-done
-
-VERSION_ARG="${VERSION_ARG:-patch}"
+VERSION_ARG="${1:-patch}"
+if [ "$VERSION_ARG" = "-h" ] || [ "$VERSION_ARG" = "--help" ]; then
+  sed -n '2,/^$/p' "$0" | head -n 6
+  exit 0
+fi
 
 CURRENT=$(grep '"version"' package.json | head -1 | sed -E 's/.*"version": *"([^"]+)".*/\1/')
 if [ -z "$CURRENT" ]; then
@@ -87,14 +74,15 @@ if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin "$TAG" 2>
   exit 1
 fi
 
-# ── Rollback trap ─────────────────────────────────────────────────────────
+# ── Rollback trap (local only; a completed push can't be undone here) ─────
 
 PRE_SHA=$(git rev-parse HEAD)
 cleanup_on_failure() {
   echo "Release failed. Rolling back local state..." >&2
   git reset --hard "$PRE_SHA" >/dev/null 2>&1 || true
   git tag -d "$TAG" >/dev/null 2>&1 || true
-  echo "Working tree restored to $PRE_SHA. Nothing was pushed." >&2
+  rm -f CHANGELOG.md.tmp
+  echo "Local state restored to $PRE_SHA. If a push already completed, origin may hold the release commit." >&2
 }
 trap cleanup_on_failure ERR
 
@@ -147,20 +135,4 @@ trap - ERR
 
 echo ""
 echo "✓ v$VERSION pushed."
-
-if [ "$WAIT_MODE" = "--wait" ]; then
-  RUN_ID=""
-  for _ in $(seq 1 30); do
-    RUN_ID=$(gh run list --workflow=release.yml --branch="$TAG" --limit=1 \
-      --json databaseId --jq '.[0].databaseId // ""' 2>/dev/null || true)
-    if [ -n "$RUN_ID" ]; then break; fi
-    sleep 2
-  done
-  if [ -n "$RUN_ID" ]; then
-    gh run watch "$RUN_ID" --exit-status
-  else
-    echo "Warning: release workflow run for $TAG didn't appear within 60s." >&2
-  fi
-else
-  echo "Next: gh run watch   # wait for the release workflow to publish"
-fi
+echo "Next: gh run watch   # wait for the release workflow to publish"
